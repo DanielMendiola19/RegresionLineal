@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Regresión No Lineal - Estadística Computacional</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.6.0/lib/browser/math.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+ :root {
+    --primary: #6a0572; /* Darker purple */
+    --primary-light: #9a17a9; /* Lighter purple */
+    --secondary: #640d6b; /* Even darker purple */
+    --accent: #b42ee1; /* Bright violet */
+    --light: #f7e6f8; /* Very light purple */
+    --dark: #1a001c; /* Almost black */
+    --gray: #8c8c8c; /* Medium gray */
+    --light-gray: #e0e0e0; /* Lighter gray */
+    --success: #3ddc84; /* Vibrant green */
+    --warning: #ff4d6d; /* Bright pinkish-red */
+    --card-shadow: 0 12px 24px rgba(0,0,0,0.15);
+    --transition: all 0.4s ease-in-out;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    font-family: 'Roboto', sans-serif; /* Changed font */
+    background: linear-gradient(160deg, #f0f4f8 0%, #d9e2ec 100%); /* Softer gradient */
+    color: var(--dark);
+    line-height: 1.8; /* Increased line-height for readability */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%); /* New gradient */
+    color: white;
+    text-align: center;
+    padding: 3rem 1.5rem; /* Increased padding */
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+    border-bottom-left-radius: 50px; /* Rounded corners */
+    border-bottom-right-radius: 50px;
+}
+
+header::before {
+    content: "";
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(circle at 70% 30%, rgba(255,255,255,0.15) 0%, transparent 60%); /* Different radial gradient */
+    transform: rotate(15deg);
+}
+
+header h1 {
+    margin: 0;
+    font-weight: 800; /* Bolder font */
+    font-size: 3rem; /* Larger font size */
+    letter-spacing: 1px;
+    position: relative;
+    text-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.subtitle {
+    font-weight: 400;
+    font-size: 1.35rem; /* Slightly larger */
+    margin-top: 0.75rem;
+    opacity: 0.95;
+    position: relative;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+main {
+    max-width: 1300px; /* Wider main content */
+    margin: 3rem auto 4rem; /* Increased margins */
+    padding: 0 2rem;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); /* Adjusted min-width for cards */
+    gap: 2.5rem; /* Increased gap */
+}
+
+.card {
+    background: white;
+    border-radius: 20px; /* More rounded corners */
+    padding: 2.5rem; /* Increased padding */
+    box-shadow: var(--card-shadow);
+    transition: var(--transition);
+    border: 1px solid rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 8px; /* Accent line at the top */
+    background: linear-gradient(to right, var(--primary-light) 0%, var(--accent) 100%);
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+}
+
+.card:hover {
+    transform: translateY(-8px); /* More pronounced lift */
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+h2 {
+    margin-top: 0.5rem; /* Adjusted margin */
+    font-size: 2.2rem; /* Larger font size */
+    font-weight: 700;
+    color: var(--primary);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 4px solid var(--primary-light); /* Thicker border */
+    font-family: 'Montserrat', sans-serif;
+    position: relative;
+}
+
+h2::after {
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 60px; /* Short accent line below title */
+    height: 4px;
+    background: var(--accent);
+}
+
+h3 {
+    font-size: 1.6rem;
+    color: var(--secondary);
+    margin-bottom: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.8rem;
+    color: var(--dark);
+    font-size: 1.05rem;
+}
+
+select, input[type="number"] {
+    width: 100%;
+    padding: 0.85rem 1.1rem; /* Slightly more padding */
+    margin-bottom: 1.75rem;
+    border: 2px solid var(--light-gray);
+    border-radius: 12px; /* More rounded input fields */
+    font-size: 1.05rem;
+    transition: var(--transition);
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--light); /* Light background for inputs */
+    color: var(--dark);
+}
+
+select:focus, input[type="number"]:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(180, 46, 225, 0.25); /* More prominent shadow */
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 1rem; /* Increased spacing */
+    margin-bottom: 2rem;
+}
+
+thead th {
+    text-align: center;
+    font-weight: 700;
+    padding: 1rem; /* More padding */
+    color: var(--primary);
+    font-size: 1.15rem;
+    background-color: rgba(106, 5, 114, 0.1); /* Lighter background for table header */
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+tbody td {
+    background: white;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.07);
+    transition: var(--transition);
+}
+
+tbody tr:hover td {
+    background: rgba(180, 46, 225, 0.1); /* Hover color from accent */
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+}
+
+input.x-input, input.y-input {
+    width: 100px; /* Slightly wider input */
+    padding: 0.75rem 0.9rem;
+    font-size: 1.05rem;
+    border: 2px solid var(--light-gray);
+    border-radius: 10px;
+    transition: var(--transition);
+    text-align: center;
+}
+
+input.x-input:focus, input.y-input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(180, 46, 225, 0.25);
+}
+
+button {
+    background: linear-gradient(to right, var(--primary) 0%, var(--accent) 100%);
+    color: white;
+    border: none;
+    padding: 0.9rem 2rem; /* More padding */
+    border-radius: 50px;
+    font-size: 1.1rem; /* Larger font size */
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 6px 15px rgba(106, 5, 114, 0.4);
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 160px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+button::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, var(--primary-light) 0%, var(--accent) 100%);
+    opacity: 0;
+    transition: var(--transition);
+}
+
+button:hover {
+    transform: translateY(-4px); /* More lift on hover */
+    box-shadow: 0 10px 25px rgba(106, 5, 114, 0.5);
+}
+
+button:hover::after {
+    opacity: 1;
+}
+
+button span {
+    position: relative;
+    z-index: 1;
+}
+
+.buttons-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem; /* Increased gap */
+    margin-bottom: 2rem;
+    justify-content: center; /* Center buttons */
+}
+
+.projection-section {
+    margin-top: 3rem; /* More space */
+    border-top: 2px solid var(--light-gray); /* Thicker border */
+    padding-top: 2rem;
+}
+
+#projection-result {
+    background: linear-gradient(135deg, rgba(61, 220, 132, 0.1) 0%, rgba(180, 46, 225, 0.1) 100%); /* New gradient for result */
+    padding: 1.5rem;
+    border-radius: 15px; /* More rounded */
+    font-weight: 700;
+    font-size: 1.3rem; /* Larger font */
+    color: var(--primary-dark);
+    margin-top: 1.5rem;
+    min-height: 70px; /* Taller */
+    border-left: 6px solid var(--success); /* Thicker accent border */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Center text */
+    text-align: center;
+}
+
+.result-item {
+    margin-bottom: 1.2rem;
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    font-size: 1.05rem;
+    color: var(--dark);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+    border-left: 5px solid var(--accent); /* Thicker accent border */
+}
+
+.result-item strong {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.chart-container {
+    width: 100%;
+    margin-top: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    background: white;
+    padding: 2rem;
+    border: 1px solid rgba(0,0,0,0.07);
+}
+
+footer {
+    background: linear-gradient(135deg, var(--dark) 0%, #3a003e 100%); /* Darker gradient */
+    color: white;
+    padding: 4rem 1.5rem; /* More padding */
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-top-left-radius: 50px;
+    border-top-right-radius: 50px;
+    margin-top: 4rem;
+}
+
+footer::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 7px; /* Thicker top line */
+    background: linear-gradient(to right, var(--primary) 0%, var(--accent) 100%);
+}
+
+.footer-content {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem; /* Increased gap */
+    text-align: left;
+}
+
+.footer-section {
+    padding: 0 1.2rem;
+}
+
+.footer-section h3 {
+    color: white;
+    font-size: 1.4rem;
+    margin-bottom: 1.75rem;
+    position: relative;
+    display: inline-block;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.footer-section h3::after {
+    content: "";
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+.footer-section p {
+    margin-bottom: 1.2rem;
+    opacity: 0.9;
+    line-height: 1.8;
+}
+
+.footer-bottom {
+    margin-top: 3rem; /* More space */
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255,255,255,0.15); /* Slightly thicker border */
+    font-size: 0.95rem;
+    opacity: 0.85;
+}
+
+.credits {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+}
+
+.credit-item {
+    background: rgba(255,255,255,0.15); /* Slightly more opaque */
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.95rem;
+    transition: var(--transition);
+}
+
+.credit-item:hover {
+    background: rgba(255,255,255,0.25);
+    transform: translateY(-3px);
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.5rem;
+    }
+
+    .subtitle {
+        font-size: 1.15rem;
+    }
+
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .footer-section h3::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    button {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .card {
+        padding: 2rem; /* Slightly less padding on smaller screens */
+    }
+
+    h2 {
+        font-size: 2rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeInScale {
+    from { opacity: 0; transform: translateY(20px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.card, footer, header { /* Apply animation to header as well */
+    animation: fadeInScale 0.8s ease-out forwards; /* Slower and scaling animation */
+}
+
+/* Tooltip for model selection */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 220px; /* Wider tooltip */
+    background-color: var(--dark);
+    color: white;
+    text-align: center;
+    border-radius: 8px; /* More rounded */
+    padding: 0.6rem;
+    position: absolute;
+    z-index: 1;
+    bottom: 130%; /* Higher position */
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out; /* Slower transition */
+    font-size: 0.95rem;
+    font-weight: normal;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Add a pseudo-element for the tooltip arrow */
+.tooltip .tooltiptext::after {
+    content: " ";
+    position: absolute;
+    top: 100%; /* At the bottom of the tooltip */
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: var(--dark) transparent transparent transparent;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Regresión No Lineal</h1>
+    <div class="subtitle">Análisis de Datos</div>
+  </header>
+
+  <main>
+    <div class="container">
+      <section class="card" aria-label="Ingreso de datos">
+        <h2>Ingreso de Datos</h2>
+
+        <label for="model-type">Seleccione el modelo de regresión:</label>
+        <select id="model-type" aria-describedby="model-desc">
+          <option value="exponential">Exponencial (y = ae^(bx))</option>
+          <option value="power">Potencia (y = ax^b)</option>
+          <option value="logarithmic">Logarítmica (y = a + b·ln(x))</option>
+          <option value="polynomial">Polinomial (y = ax² + bx + c)</option>
+        </select>
+
+        <table id="data-table" aria-label="Tabla de datos">
+          <thead>
+            <tr>
+              <th scope="col">X</th>
+              <th scope="col">Y</th>
+              <th scope="col" aria-label="Acciones"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="number" class="x-input" step="any" aria-label="Valor X" /></td>
+              <td><input type="number" class="y-input" step="any" aria-label="Valor Y" /></td>
+              <td><button onclick="removeRow(this)" aria-label="Eliminar fila"><span>Eliminar</span></button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="buttons-row">
+          <button onclick="addRow()" aria-label="Agregar fila"><span>Agregar Fila</span></button>
+          <button onclick="calculateRegression()" aria-label="Calcular regresión"><span>Calcular Regresión</span></button>
+          <button onclick="clearData()" aria-label="Limpiar datos"><span>Limpiar Datos</span></button>
+        </div>
+
+        <div class="projection-section" aria-label="Proyección de datos">
+          <h3>Proyección de Datos</h3>
+          <label for="project-x">Valor de X para proyectar Y:</label>
+          <input type="number" id="project-x" step="any" aria-label="Valor para proyectar Y" />
+          <button onclick="projectValue()" aria-label="Proyectar valor"><span>Proyectar</span></button>
+          <div id="projection-result" class="result-item" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Resultados">
+        <h2>Resultados</h2>
+        <div id="results-container">
+          <div class="result-item">
+            Ingrese los datos y haga clic en "Calcular Regresión" para ver los resultados.
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <canvas id="regression-chart" aria-label="Gráfico de regresión"></canvas>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-content">
+      
+      <div class="footer-section">
+        <h3>Información Académica</h3>
+        <p><strong>Materia:</strong> Estadística Computacional</p>
+        <p><strong>Docente:</strong> Franklin Carrillo Costas</p>
+        <p><strong>Universidad:</strong> Universidad Privada del Valle</p>
+      </div>
+      
+      <div class="footer-section">
+        <h3>Integrantes</h3>
+        <div class="credits">
+          <div class="credit-item">Aranda Quino Jose Luis</div>
+          <div class="credit-item">Morales Merlo Javier Limber</div>
+          <div class="credit-item">Tintaya Ramos Marioly Belen</div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
