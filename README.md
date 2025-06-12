@@ -1,0 +1,2 @@
+# RegresionLineal
+Aranda, Morales, Tintaya
